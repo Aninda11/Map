@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Map Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh; /* Full height */
+        }
+        /* Sidebar */
+        .sidebar {
+            width: 25%;
+            background-color: #f4f4f4; /* Light grey background */
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            margin-top: 0;
+        }
+        /* Map container */
+        .map-container {
+            width: 75%;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        function onMapClick(e) {
+            const latitude = e.latlng.lat;
+            const longitude = e.latlng.lng;
+
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ latitude, longitude })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('info').innerText = data;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapContainer = document.querySelector('.map-container');
+            const map = L.map(mapContainer).setView([51.5074, -0.1278], 12); // Centered on London
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Add click event to the map
+            map.on('click', onMapClick);
+        });
+    </script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Selected Area Information</h2>
+        <p id="info">Click on the map to get information.</p>
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-container"></div>
+</body>
+</html>
